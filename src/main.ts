@@ -12,22 +12,30 @@ let fig_x = 0;
 let fig_y = 0;
 
 let isProcessing = false;
+let isPaused = false;
 
 let arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
-ctx.font = '36px serif';
+ctx.font = "16px 'Press Start 2P'";
 ctx.fillStyle = 'blue'; 
 ctx.fillText('Next:', COLS*FIGURE_MULTIPLIER+20, ROWS*FIGURE_MULTIPLIER/2-30); // Fills the text
 
 let nextFigure = randomFigure()
 
 const drawLinesNumber = (lines) => {
+    ctx.font = "16px 'Press Start 2P'";
     ctx.fillStyle = 'white';
     ctx.fillRect(COLS*FIGURE_MULTIPLIER+20,ROWS*FIGURE_MULTIPLIER/3,160,40)
     ctx.fillStyle = 'blue'; 
     ctx.fillText('Lines: '+ lines, COLS*FIGURE_MULTIPLIER+20, ROWS*FIGURE_MULTIPLIER/3+30); // Fills the text
+}
+
+const drawPause = () => {
+    ctx.fillStyle = 'yellow';
+    ctx.font = "56px 'Press Start 2P'";
+    ctx.fillText('PAUSE', 84, ROWS*FIGURE_MULTIPLIER/2); // Fills the text
 }
 
 const spawnFigure = (newFigure: Figure) => {
@@ -49,7 +57,7 @@ drawFigure(nextFigure, ROWS / 2, COLS + 10, ctx)
 
 const interval = setInterval(async () => {
     // ⛔ If we are processing breakdown/spawning — SKIP this tick
-    if (isProcessing || !currentFigure) return;
+    if (isProcessing || isPaused || !currentFigure) return;
 
     drawCanvas(arr, ctx);
     drawFigure(currentFigure, fig_x, fig_y, ctx);
@@ -102,5 +110,11 @@ window.addEventListener("keydown", (e) => {
                 fig_x++
             }
         }
+    }
+    if(e.key === "Enter") {
+        e.preventDefault
+        if(!isPaused)
+            drawPause()
+        isPaused = !isPaused
     }
 });
