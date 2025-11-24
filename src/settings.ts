@@ -1,3 +1,4 @@
-export const ROWS = 130;
-export const COLS = 70;
+export const ROWS = 150;
+export const COLS = 90;
 export const FIGURE_MULTIPLIER = 5;
+export const SQUARE_SIZE = 5;

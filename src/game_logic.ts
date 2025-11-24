@@ -1,7 +1,13 @@
 import { drawCanvas } from "./draw";
 import { COLS, FIGURE_MULTIPLIER, ROWS } from "./settings";
+import { Figure } from "./types";
 
-export const fillNeighbor = (row, col, val, grid, state) => {
+interface State {
+    minRow: number;
+    maxCol: number;
+}
+
+export const fillNeighbor = (row: number, col: number, val: number, grid: number[][], state: State) => {
 
     // out of bounds
     if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return;
@@ -43,10 +49,7 @@ export const fillNeighbor = (row, col, val, grid, state) => {
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 
-export const breakDown = async (arr, ctx) => {
-    const ROWS = arr.length;
-    const COLS = arr[0].length;
-
+export const breakDown = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
     let moved = true;
 
     while (moved) {
@@ -91,7 +94,7 @@ export const breakDown = async (arr, ctx) => {
     }
 };
 
-const replaceValue = (arr, val1, val2) => {
+const replaceValue = (arr: number[][], val1: number, val2: number) => {
     for (let rowIndex = 0; rowIndex < arr.length; rowIndex++) {
         const row = arr[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
@@ -104,8 +107,7 @@ const replaceValue = (arr, val1, val2) => {
 
 
 
-export const checkConnection = async (arr, ctx) => {
-    console.log('checkConnection')
+export const checkConnection = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
     let isConnection = false;
     let state = { maxCol: 0, minRow: ROWS };
 
@@ -113,10 +115,8 @@ export const checkConnection = async (arr, ctx) => {
     while (arr[state.minRow - 1][0] > 0 && !arr[ROWS - 1].includes(0)) {
         let newArr = arr.map(row => [...row]);  // deep clone
 
-        console.log({ state })
         // Start at bottom-left (THIS WAS WRONG BEFORE)
         const startVal = arr[state.minRow - 1][0];
-        console.log({ startVal })
 
         // Flood-fill the row above (same value!)
         fillNeighbor(state.minRow - 1, 0, startVal, newArr, state);
@@ -124,7 +124,15 @@ export const checkConnection = async (arr, ctx) => {
         // If we reached last column → connection exists
         if (state.maxCol === COLS - 1) {
             state.maxCol = 0
-            arr = newArr.map(row => [...row]);
+
+
+            // copy newArr contents into the original arr object
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    arr[r][c] = newArr[r][c];
+                }
+            }
+
             console.log({ newArr })
             isConnection = true;
             replaceValue(arr, 8, 7)
@@ -132,13 +140,14 @@ export const checkConnection = async (arr, ctx) => {
     }
     if (isConnection) {
         drawCanvas(arr, ctx)
+        await sleep(50)
         replaceValue(arr, 7, 0)
         await breakDown(arr, ctx);
     }
 };
 
 
-export const pinFigure = (arr, figure, x, y) => {
+export const pinFigure = (arr: number[][], figure: Figure, x: number, y: number) => {
     for (let rowIndex = 0; rowIndex < figure.shape.length; rowIndex++) {
         const row = figure.shape[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
@@ -150,4 +159,22 @@ export const pinFigure = (arr, figure, x, y) => {
             }
         }
     }
+}
+
+
+export const spingFigure = (figure: Figure) => {
+    const { shape } = figure
+    const rows = shape.length;
+    const cols = shape[0].length;
+
+    const rotated = Array.from({ length: cols }, () => Array(rows).fill(0));
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            // 90° clockwise: [r][c] -> [c][rows - 1 - r]
+            rotated[c][rows - 1 - r] = shape[r][c];
+        }
+    }
+
+    return { shape: rotated, value: figure.value };
 }
