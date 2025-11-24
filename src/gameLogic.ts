@@ -108,7 +108,8 @@ const replaceValue = (arr: number[][], val1: number, val2: number) => {
 
 
 export const checkConnection = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
-    let isConnection = false;
+    // let isConnection = false;
+    let conectedLines = 0;
     let state = { maxCol: 0, minRow: ROWS };
 
     // Continue climbing up ONLY if the next row is full
@@ -133,17 +134,17 @@ export const checkConnection = async (arr: number[][], ctx: CanvasRenderingConte
                 }
             }
 
-            console.log({ newArr })
-            isConnection = true;
+            conectedLines ++;
             replaceValue(arr, 8, 7)
         }
     }
-    if (isConnection) {
+    if (conectedLines > 0) {
         drawCanvas(arr, ctx)
         await sleep(50)
         replaceValue(arr, 7, 0)
         await breakDown(arr, ctx);
     }
+    return conectedLines;
 };
 
 
