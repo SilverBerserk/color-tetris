@@ -179,3 +179,5 @@ export const spingFigure = (figure: Figure) => {
 
     return { shape: rotated, value: figure.value };
 }
+
+

@@ -1,5 +1,5 @@
 import { checkBorders, checkForColision } from "./colision";
-import { clearNextFigure, drawCanvas, drawFigure } from "./draw";
+import { clearNextFigure, drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawPause } from "./draw";
 import { randomFigure } from "./figures";
 import { breakDown, checkConnection, pinFigure, spingFigure } from "./gameLogic";
 import { COLS, FIGURE_MULTIPLIER, ROWS } from "./settings";
@@ -13,30 +13,19 @@ let fig_y = 0;
 
 let isProcessing = false;
 let isPaused = false;
+let isGameOver = false;
 
-let arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
-ctx.font = "16px 'Press Start 2P'";
-ctx.fillStyle = 'blue'; 
-ctx.fillText('Next:', COLS*FIGURE_MULTIPLIER+20, ROWS*FIGURE_MULTIPLIER/2-30); // Fills the text
 
-let nextFigure = randomFigure()
-
-const drawLinesNumber = (lines) => {
+document.fonts.ready.then(() => {
     ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = 'white';
-    ctx.fillRect(COLS*FIGURE_MULTIPLIER+20,ROWS*FIGURE_MULTIPLIER/3,160,40)
-    ctx.fillStyle = 'blue'; 
-    ctx.fillText('Lines: '+ lines, COLS*FIGURE_MULTIPLIER+20, ROWS*FIGURE_MULTIPLIER/3+30); // Fills the text
+    ctx.fillStyle = 'blue';
+    drawLinesNumber(lines, ctx)
+    ctx.fillText('Next:', COLS * FIGURE_MULTIPLIER + 20, ROWS * FIGURE_MULTIPLIER / 2 - 30); // Fills the text
 }
-
-const drawPause = () => {
-    ctx.fillStyle = 'yellow';
-    ctx.font = "56px 'Press Start 2P'";
-    ctx.fillText('PAUSE', 84, ROWS*FIGURE_MULTIPLIER/2); // Fills the text
-}
+)
 
 const spawnFigure = (newFigure: Figure) => {
     fig_x = 0;
@@ -46,18 +35,29 @@ const spawnFigure = (newFigure: Figure) => {
         return newFigure
     else {
         isProcessing = false;
+        isGameOver = true;
+        drawGameOver(ctx)
         console.log('Game Over')
     }
 }
 
-let currentFigure = spawnFigure(nextFigure)
-nextFigure = randomFigure()
+let arr: number[][];
+let currentFigure: Figure | undefined;
+let nextFigure: Figure
 
-drawFigure(nextFigure, ROWS / 2, COLS + 10, ctx)
+const init = () => {
+    arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
+    currentFigure = spawnFigure(randomFigure())
+    nextFigure = randomFigure()
+    drawFigure(nextFigure, ROWS / 2, COLS + 10, ctx)
+}
+
+init()
+
 
 const interval = setInterval(async () => {
     // ⛔ If we are processing breakdown/spawning — SKIP this tick
-    if (isProcessing || isPaused || !currentFigure) return;
+    if (isGameOver || isProcessing || isPaused || !currentFigure) return;
 
     drawCanvas(arr, ctx);
     drawFigure(currentFigure, fig_x, fig_y, ctx);
@@ -69,7 +69,7 @@ const interval = setInterval(async () => {
         pinFigure(arr, currentFigure, fig_x, fig_y);
         await breakDown(arr, ctx);    // wait for sand-fall animation
         lines += await checkConnection(arr, ctx)
-        drawLinesNumber(lines)
+        drawLinesNumber(lines, ctx)
         // currentFigure = spawnFigure();  // generate only ONCE
         currentFigure = spawnFigure(nextFigure)
         nextFigure = randomFigure()
@@ -111,10 +111,17 @@ window.addEventListener("keydown", (e) => {
             }
         }
     }
-    if(e.key === "Enter") {
+    if (e.key === "Enter") {
         e.preventDefault
-        if(!isPaused)
-            drawPause()
-        isPaused = !isPaused
+        if (isGameOver) {
+            init()
+            isGameOver = false;
+            isPaused = false
+        }
+        else {
+            if (!isPaused)
+                drawPause(ctx)
+            isPaused = !isPaused
+        }
     }
 });
