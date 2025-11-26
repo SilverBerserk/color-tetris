@@ -87,7 +87,6 @@ export const breakDown = async (arr: number[][], ctx: CanvasRenderingContext2D) 
                     continue;
                 }
             }
-
         }
         drawCanvas(arr, ctx);
         await sleep(50)
@@ -147,8 +146,12 @@ export const checkConnection = async (arr: number[][], ctx: CanvasRenderingConte
         await sleep(50)
         replacedValues = replaceValue(arr, 7, 0)
         await breakDown(arr, ctx);
+
+        const valuesAndLines = await checkConnection(arr, ctx)
+        replacedValues += valuesAndLines.replacedValues;
+        conectedLines += valuesAndLines.conectedLines;
     }
-        return {replacedValues,conectedLines};
+    return { replacedValues, conectedLines };
 };
 
 
@@ -166,7 +169,7 @@ export const pinFigure = (arr: number[][], figure: Figure, x: number, y: number)
     }
 }
 
-export const spingFigure = (figure: Figure, clockwise: boolean = false) => {
+export const spinFigure = (figure: Figure, clockwise: boolean = false) => {
     const { shape } = figure
     const rows = shape.length;
     const cols = shape[0].length;

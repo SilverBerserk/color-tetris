@@ -1,7 +1,7 @@
 import { checkBorders, checkForColision } from "./colision";
-import { clearNextFigure, drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawPause, drawScore, drawStats } from "./draw";
+import { drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawNextFigure, drawPause, drawScore, drawStats } from "./draw";
 import { randomFigure } from "./figures";
-import { breakDown, checkConnection, pinFigure, spingFigure } from "./gameLogic";
+import { breakDown, checkConnection, pinFigure, spinFigure } from "./gameLogic";
 import { COLS, FIGURE_MULTIPLIER, ROWS } from "./settings";
 import { Figure } from "./types";
 
@@ -51,7 +51,7 @@ const init = () => {
     nextFigure = randomFigure();
     lines = 0;
     score = 0
-    drawFigure(nextFigure, COLS + 10, ROWS / 2, ctx)
+    drawNextFigure(nextFigure, COLS + 10, ROWS / 2, ctx)
 }
 
 init()
@@ -78,8 +78,7 @@ const interval = setInterval(async () => {
         // currentFigure = spawnFigure();  // generate only ONCE
         currentFigure = spawnFigure(nextFigure)
         nextFigure = randomFigure()
-        clearNextFigure(COLS + 10, ROWS / 2,  ctx)
-        drawFigure(nextFigure,COLS + 10, ROWS / 2 , ctx)
+        drawNextFigure(nextFigure, COLS + 10, ROWS / 2 , ctx)
 
         isProcessing = false; // 🔓 unlock
     }
@@ -101,14 +100,14 @@ window.addEventListener("keydown", (e) => {
     }
     if (e.key === "ArrowUp") {
         if (currentFigure) {
-            const newFigure = spingFigure(currentFigure)
+            const newFigure = spinFigure(currentFigure)
             if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x, fig_y))
                 currentFigure = newFigure;
         }
     }
     if (e.key === "ArrowDown") {
         if (currentFigure) {
-            const newFigure = spingFigure(currentFigure, true)
+            const newFigure = spinFigure(currentFigure, true)
             if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x, fig_y))
                 currentFigure = newFigure;
         }

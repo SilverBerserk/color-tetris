@@ -28,9 +28,10 @@ export const drawFigure = (figure: Figure, x: number, y: number, ctx: CanvasRend
     }
 }
 
-export const clearNextFigure = (x: number, y: number, ctx: CanvasRenderingContext2D) => {
+export const drawNextFigure = (figure:Figure, x: number, y: number, ctx: CanvasRenderingContext2D) => {
     ctx.fillStyle = "#FFF"
     ctx.fillRect(x * SQUARE_SIZE, y * SQUARE_SIZE, 4 * SQUARE_SIZE * SQUARE_SIZE, 2 * SQUARE_SIZE * SQUARE_SIZE);
+    drawFigure(figure , x, y , ctx)
 }
 
 export const drawStats = (ctx: CanvasRenderingContext2D) => {
