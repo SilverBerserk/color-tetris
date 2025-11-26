@@ -1,25 +1,21 @@
 import { drawCanvas } from "./draw";
 import { COLS, FIGURE_MULTIPLIER, ROWS } from "./settings";
-import { Figure } from "./types";
+import { Figure, State } from "./types";
 
-interface State {
-    minRow: number;
-    maxCol: number;
-}
 
-export const fillNeighbor = (row: number, col: number, val: number, grid: number[][], state: State) => {
+export const fillNeighbor = (row: number, col: number, val: number, arr: number[][], state: State) => {
 
     // out of bounds
-    if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return;
+    if (row < 0 || row >= arr.length || col < 0 || col >= arr[0].length) return;
 
     // ❗ avoid infinite recursion — if already visited (8), stop
-    if (grid[row][col] === 8) return;
+    if (arr[row][col] === 8) return;
 
     // not same value → stop
-    if (grid[row][col] !== val) return;
+    if (arr[row][col] !== val) return;
 
     // mark visited
-    grid[row][col] = 8;
+    arr[row][col] = 8;
 
     // update minRow
     if (col === 0 && row < state.minRow) {
@@ -32,17 +28,17 @@ export const fillNeighbor = (row: number, col: number, val: number, grid: number
     }
 
     // original recursion structure (UNCHANGED):
-    if (row + 1 < grid.length && grid[row + 1][col] === val)
-        fillNeighbor(row + 1, col, val, grid, state);
+    if (row + 1 < arr.length && arr[row + 1][col] === val)
+        fillNeighbor(row + 1, col, val, arr, state);
 
-    if (row - 1 >= 0 && grid[row - 1][col] === val)
-        fillNeighbor(row - 1, col, val, grid, state);
+    if (row - 1 >= 0 && arr[row - 1][col] === val)
+        fillNeighbor(row - 1, col, val, arr, state);
 
-    if (col + 1 < grid[0].length && grid[row][col + 1] === val)
-        fillNeighbor(row, col + 1, val, grid, state);
+    if (col + 1 < arr[0].length && arr[row][col + 1] === val)
+        fillNeighbor(row, col + 1, val, arr, state);
 
-    if (col - 1 >= 0 && grid[row][col - 1] === val)
-        fillNeighbor(row, col - 1, val, grid, state);
+    if (col - 1 >= 0 && arr[row][col - 1] === val)
+        fillNeighbor(row, col - 1, val, arr, state);
 };
 
 
@@ -174,16 +170,16 @@ export const spinFigure = (figure: Figure, clockwise: boolean = false) => {
     const rows = shape.length;
     const cols = shape[0].length;
 
-    const rotated = Array.from({ length: cols }, () => Array(rows).fill(0));
+    const rotatedShape = Array.from({ length: cols }, () => Array(rows).fill(0));
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             if (clockwise)
-                rotated[c][rows - 1 - r] = shape[r][c]
+                rotatedShape[c][rows - 1 - r] = shape[r][c]
             else
-                rotated[cols - 1 - c][r] = shape[r][c];
+                rotatedShape[cols - 1 - c][r] = shape[r][c];
         }
     }
 
-    return { shape: rotated, value: figure.value };
+    return { shape: rotatedShape, value: figure.value };
 }
