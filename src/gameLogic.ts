@@ -95,14 +95,17 @@ export const breakDown = async (arr: number[][], ctx: CanvasRenderingContext2D) 
 };
 
 const replaceValue = (arr: number[][], val1: number, val2: number) => {
+    let valuesReplaced = 0;
     for (let rowIndex = 0; rowIndex < arr.length; rowIndex++) {
         const row = arr[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
             if (row[colIndex] == val1) {
                 row[colIndex] = val2
+                valuesReplaced++;
             }
         }
     }
+    return valuesReplaced;
 }
 
 
@@ -110,6 +113,7 @@ const replaceValue = (arr: number[][], val1: number, val2: number) => {
 export const checkConnection = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
     // let isConnection = false;
     let conectedLines = 0;
+    let replacedValues = 0;
     let state = { maxCol: 0, minRow: ROWS };
 
     // Continue climbing up ONLY if the next row is full
@@ -134,17 +138,18 @@ export const checkConnection = async (arr: number[][], ctx: CanvasRenderingConte
                 }
             }
 
-            conectedLines ++;
+            conectedLines++;
             replaceValue(arr, 8, 7)
         }
     }
     if (conectedLines > 0) {
         drawCanvas(arr, ctx)
         await sleep(50)
-        replaceValue(arr, 7, 0)
+        replacedValues = replaceValue(arr, 7, 0)
         await breakDown(arr, ctx);
     }
-    return conectedLines;
+    console.log({replacedValues,conectedLines})
+        return {replacedValues,conectedLines};
 };
 
 
@@ -163,7 +168,7 @@ export const pinFigure = (arr: number[][], figure: Figure, x: number, y: number)
 }
 
 
-export const spingFigure = (figure: Figure) => {
+export const spingFigure = (figure: Figure, clockwise: boolean = false) => {
     const { shape } = figure
     const rows = shape.length;
     const cols = shape[0].length;
@@ -172,8 +177,10 @@ export const spingFigure = (figure: Figure) => {
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-            // 90° clockwise: [r][c] -> [c][rows - 1 - r]
-            rotated[c][rows - 1 - r] = shape[r][c];
+            if (clockwise)
+                rotated[c][rows - 1 - r] = shape[r][c]
+            else
+                rotated[cols - 1 - c][r] = shape[r][c];
         }
     }
 

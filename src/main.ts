@@ -1,5 +1,5 @@
 import { checkBorders, checkForColision } from "./colision";
-import { clearNextFigure, drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawPause } from "./draw";
+import { clearNextFigure, drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawPause, drawScore, drawStats } from "./draw";
 import { randomFigure } from "./figures";
 import { breakDown, checkConnection, pinFigure, spingFigure } from "./gameLogic";
 import { COLS, FIGURE_MULTIPLIER, ROWS } from "./settings";
@@ -7,6 +7,7 @@ import { Figure } from "./types";
 
 
 let lines = 0;
+let score = 0;
 
 let fig_x = 0;
 let fig_y = 0;
@@ -19,13 +20,12 @@ let isGameOver = false;
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
-document.fonts.ready.then(() => {
-    ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = 'blue';
-    drawLinesNumber(lines, ctx)
-    ctx.fillText('Next:', COLS * FIGURE_MULTIPLIER + 20, ROWS * FIGURE_MULTIPLIER / 2 - 30); // Fills the text
-}
-)
+document.fonts.ready.then(
+    () => {
+        drawStats(ctx)
+        drawLinesNumber(lines, ctx)
+        drawScore(score, ctx)
+    })
 
 const spawnFigure = (newFigure: Figure) => {
     fig_x = 0;
@@ -47,8 +47,10 @@ let nextFigure: Figure
 
 const init = () => {
     arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
-    currentFigure = spawnFigure(randomFigure())
-    nextFigure = randomFigure()
+    currentFigure = spawnFigure(randomFigure());
+    nextFigure = randomFigure();
+    lines = 0;
+    score = 0
     drawFigure(nextFigure, ROWS / 2, COLS + 10, ctx)
 }
 
@@ -68,8 +70,12 @@ const interval = setInterval(async () => {
 
         pinFigure(arr, currentFigure, fig_x, fig_y);
         await breakDown(arr, ctx);    // wait for sand-fall animation
-        lines += await checkConnection(arr, ctx)
+        const { replacedValues, conectedLines } = await checkConnection(arr, ctx)
+        console.log({ replacedValues, conectedLines })
+        lines += conectedLines;
+        score += replacedValues;
         drawLinesNumber(lines, ctx)
+        drawScore(score, ctx)
         // currentFigure = spawnFigure();  // generate only ONCE
         currentFigure = spawnFigure(nextFigure)
         nextFigure = randomFigure()
@@ -85,18 +91,17 @@ const interval = setInterval(async () => {
 
 
 window.addEventListener("keydown", (e) => {
+    console.log(e.key)
+    e.preventDefault();
     if (e.key === "ArrowLeft") {
-        e.preventDefault();
         if (fig_y > 0)
             fig_y--;
     }
     if (e.key === "ArrowRight") {
-        e.preventDefault();
         if (fig_y + (currentFigure?.shape[0].length ?? 0) * FIGURE_MULTIPLIER < COLS)
             fig_y++;
     }
     if (e.key === "ArrowUp") {
-        e.preventDefault()
         if (currentFigure) {
             const newFigure = spingFigure(currentFigure)
             if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x))
@@ -104,15 +109,25 @@ window.addEventListener("keydown", (e) => {
         }
     }
     if (e.key === "ArrowDown") {
-        e.preventDefault
+        if (currentFigure) {
+            const newFigure = spingFigure(currentFigure, true)
+            if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x))
+                currentFigure = newFigure;
+        }
+    }
+    if (e.key === " ") {
         if (currentFigure) {
             while (!checkBorders(currentFigure, fig_x) && !checkForColision(currentFigure, arr, fig_x, fig_y, "DOWN")) {
                 fig_x++
             }
         }
     }
+    if (e.key === "r") {
+        isGameOver = false;
+        isPaused = false;
+        init()
+    }
     if (e.key === "Enter") {
-        e.preventDefault
         if (isGameOver) {
             init()
             isGameOver = false;
