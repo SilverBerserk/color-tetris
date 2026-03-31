@@ -1,4 +1,4 @@
-import { checkBorders, checkForColision } from "./colision";
+import { checkBorders, checkForCollision } from "./collision";
 import { drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawNextFigure, drawPause, drawScore, drawStats } from "./draw";
 import { randomFigure } from "./figures";
 import { checkConnection, pinFigure, spinFigure } from "./gameLogic";
@@ -30,25 +30,21 @@ const spawnFigure = (newFigure: Figure) => {
     fig_y = 0;
     fig_x = Math.floor(COLS / 2 - newFigure.shape[0].length / 2);
 
-    if (!checkForColision(newFigure, arr, fig_x, fig_y))
-        return newFigure
-    else {
-        isProcessing = false;
+    if (checkForCollision(newFigure, arr, fig_x, fig_y)) {
         isGameOver = true;
-        drawGameOver(ctx)
-        console.log('Game Over')
     }
+    return newFigure
 }
 
 let arr: number[][];
-let currentFigure: Figure | undefined;
+let currentFigure: Figure;
 let nextFigure: Figure
 
 const init = () => {
     arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
     lines = 0;
     score = 0
-    
+
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
 
@@ -57,84 +53,100 @@ const init = () => {
 
 init()
 
+let lastTime = 0;
+const dropInterval = 1000; // piece falls every 1000ms
+let dropCounter = 0;
 
-const interval = setInterval(async () => {
-    // ⛔ If we are processing breakdown/spawning — SKIP this tick
-    if (isGameOver || isProcessing || isPaused || !currentFigure) return;
+const gameLoop = async (time: number) => {
+    const deltaTime = time - lastTime;
+    lastTime = time;
 
-    console.log({ arr })
+    if (!isGameOver && !isProcessing && !isPaused) {
 
-    if (checkBorders(currentFigure, fig_x, fig_y) || checkForColision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)) {
+        dropCounter += deltaTime;
 
-        isProcessing = true;  // 🔒 lock
+        if (dropCounter > dropInterval) {
+            dropCounter = 0;
 
-        pinFigure(arr, currentFigure, fig_x, fig_y);
-        const { replacedValues, conectedLines } = await checkConnection(arr, ctx)
-        lines += conectedLines;
-        score += replacedValues;
-        drawLinesNumber(lines, ctx)
-        drawScore(score, ctx)
-        // currentFigure = spawnFigure();  // generate only ONCE
-        currentFigure = spawnFigure(nextFigure)
-        nextFigure = randomFigure()
-        drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx)
+            if (
+                checkBorders(currentFigure, fig_x, fig_y) ||
+                checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)
+            ) {
+                isProcessing = true;
+                pinFigure(arr, currentFigure, fig_x, fig_y);
 
-        isProcessing = false; // 🔓 unlock
+                const { replacedValues, conectedLines } =
+                    await checkConnection(arr, ctx);
+
+                lines += conectedLines;
+                score += replacedValues;
+
+                drawLinesNumber(lines, ctx);
+                drawScore(score, ctx);
+
+                currentFigure = spawnFigure(nextFigure);
+                nextFigure = randomFigure();
+
+                drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx);
+
+              
+                isProcessing = false;
+            } else {
+                fig_y++;
+            }
+
+            drawCanvas(arr, ctx);
+            currentFigure && drawFigure(currentFigure, fig_x, fig_y, ctx);
+
+              if(isGameOver)
+                    drawGameOver(ctx)
+        }
     }
-    else {
-        fig_y++;
-    }
-    
-    drawCanvas(arr, ctx);
-    currentFigure && drawFigure(currentFigure, fig_x, fig_y, ctx);
 
-}, 2000);
+    requestAnimationFrame(gameLoop);
+};
 
+requestAnimationFrame(gameLoop);
 
 window.addEventListener("keydown", (e) => {
     e.preventDefault();
+
     if (e.key === "ArrowLeft") {
-        if (fig_x > 0 && currentFigure && !checkForColision(currentFigure, arr, fig_x, fig_y, DIRECTION.LEFT)) {
+        if (!checkBorders(currentFigure, fig_x - 1, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.LEFT)) {
             fig_x--;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowRight") {
-        if (fig_x + (currentFigure?.shape[0].length ?? 0) < COLS && currentFigure && !checkForColision(currentFigure, arr, fig_x, fig_y, DIRECTION.RIGHT)) {
+        if (!checkBorders(currentFigure, fig_x + 1, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.RIGHT)) {
             fig_x++;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowUp") {
-        if (currentFigure) {
-            const newFigure = spinFigure(currentFigure)
-            if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x, fig_y)) {
-                currentFigure = newFigure;
-                drawCanvas(arr, ctx)
-                drawFigure(currentFigure, fig_x, fig_y, ctx)
-            }
-        }
-    }
-    if (e.key === "ArrowDown") {
-        if (currentFigure) {
-            const newFigure = spinFigure(currentFigure, true)
-            if (!checkForColision(newFigure, arr, fig_x, fig_y) && !checkBorders(newFigure, fig_x, fig_y)) {
-                currentFigure = newFigure;
-                drawCanvas(arr, ctx)
-                drawFigure(currentFigure, fig_x, fig_y, ctx)
-            }
-        }
-    }
-    if (e.key === " ") {
-        if (currentFigure) {
-            while (!checkBorders(currentFigure, fig_x, fig_y) && !checkForColision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)) {
-                fig_y++
-            }
+        const newFigure = spinFigure(currentFigure)
+        if (!checkBorders(newFigure, fig_x, fig_y) && !checkForCollision(newFigure, arr, fig_x, fig_y)) {
+            currentFigure = newFigure;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
+    }
+    if (e.key === "ArrowDown") {
+        const newFigure = spinFigure(currentFigure, true)
+        if (!checkBorders(newFigure, fig_x, fig_y) && !checkForCollision(newFigure, arr, fig_x, fig_y)) {
+            currentFigure = newFigure;
+            drawCanvas(arr, ctx)
+            drawFigure(currentFigure, fig_x, fig_y, ctx)
+        }
+    }
+    if (e.key === " ") {
+        while (!checkBorders(currentFigure, fig_x, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)) {
+            fig_y++
+        }
+        drawCanvas(arr, ctx)
+        drawFigure(currentFigure, fig_x, fig_y, ctx)
     }
     if (e.key === "r") {
         isGameOver = false;
