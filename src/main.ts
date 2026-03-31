@@ -5,7 +5,6 @@ import { checkConnection, pinFigure, spinFigure } from "./gameLogic";
 import { COLS, ROWS } from "./settings";
 import { Figure, DIRECTION } from "./types";
 
-
 let lines = 0;
 let score = 0;
 
@@ -47,11 +46,13 @@ let nextFigure: Figure
 
 const init = () => {
     arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
-    currentFigure = spawnFigure(randomFigure());
-    nextFigure = randomFigure();
     lines = 0;
     score = 0
-    drawNextFigure(nextFigure, COLS + 10, ROWS / 2, ctx)
+    
+    currentFigure = spawnFigure(randomFigure());
+    nextFigure = randomFigure();
+
+    drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx)
 }
 
 init()
@@ -76,7 +77,7 @@ const interval = setInterval(async () => {
         // currentFigure = spawnFigure();  // generate only ONCE
         currentFigure = spawnFigure(nextFigure)
         nextFigure = randomFigure()
-        drawNextFigure(nextFigure, COLS + 10, ROWS / 2, ctx)
+        drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx)
 
         isProcessing = false; // 🔓 unlock
     }

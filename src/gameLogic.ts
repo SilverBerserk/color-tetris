@@ -1,48 +1,39 @@
 import { drawCanvas } from "./draw";
+import { FIGURES } from "./figures";
+import { COLS } from "./settings";
 import { Figure } from "./types";
 
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-export const cleanUp = (arr: number[][], rows: number) => {
-    for (let i = 0; i < rows; i++) {
-        for (let r = arr.length - 1; r > 0; r--) {
-            for (let c = 0; c < arr[r].length; c++) {
-                if (arr[r][c] === 7) {
-                    arr[r][c] = arr[r - 1][c];
-                    arr[r - 1][c] = r == 1 ? 0 : 7;
-                }
-            }
+const OUT_NUMBER = FIGURES.length + 1
+
+export const cleanUp = (arr: number[][]) => {
+    for (let r = arr.length - 1; r >= 0; r--) {
+        if (arr[r][0] === OUT_NUMBER) {
+            arr.splice(r, 1)
+            arr.unshift(new Array(arr[0].length).fill(0))
+            r++
         }
     }
-};
+}
 
 export const checkConnection = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
-    // let isConnection = false;
     let conectedLines = 0;
     let replacedValues = 0;
-    for (let r = arr.length - 1; r >= 0; r--) {
-        let rowBlocks = 0;
+    for (let rowIndex = arr.length - 1; rowIndex >= 0; rowIndex--) {
+        if(arr[rowIndex].some(b => !b))
+            continue
+        
+        conectedLines++
+        replacedValues += COLS;
 
-        for (let c = 0; c < arr[r].length; c++) {
-            if (arr[r][c] !== 0) {
-                rowBlocks++;
-            }
-        }
-
-        if (rowBlocks === arr[r].length) {
-            for (let c = 0; c < arr[r].length; c++) {
-                arr[r][c] = 7
-                replacedValues += rowBlocks;
-                conectedLines++;
-            }
-        }
+        arr[rowIndex].fill(OUT_NUMBER)
     }
 
-    if (replacedValues) {
+    if (conectedLines) {
         drawCanvas(arr, ctx)
         await sleep(50)
-        cleanUp(arr, conectedLines)
-        drawCanvas(arr, ctx)
+        cleanUp(arr)
     }
 
     return { replacedValues, conectedLines };
