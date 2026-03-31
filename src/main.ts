@@ -1,5 +1,5 @@
 import { checkBorders, checkForCollision } from "./collision";
-import { drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawNextFigure, drawPause, drawScore, drawStats } from "./draw";
+import { drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawNextFigure, drawPause, drawScore, drawSpeed, drawStats } from "./draw";
 import { randomFigure } from "./figures";
 import { checkConnection, pinFigure, spinFigure } from "./gameLogic";
 import { COLS, ROWS } from "./settings";
@@ -22,8 +22,10 @@ const ctx = canvas.getContext("2d")!;
 document.fonts.ready.then(
     () => {
         drawStats(ctx)
+        drawSpeed(0, ctx)
         drawLinesNumber(lines, ctx)
         drawScore(score, ctx)
+
     })
 
 const spawnFigure = (newFigure: Figure) => {
@@ -48,18 +50,21 @@ const init = () => {
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
 
-    drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx)
+    drawNextFigure(nextFigure, COLS + 4, 4, ctx)
 }
 
 init()
 
 let lastTime = 0;
-const dropInterval = 1000; // piece falls every 1000ms
 let dropCounter = 0;
+
 
 const gameLoop = async (time: number) => {
     const deltaTime = time - lastTime;
     lastTime = time;
+    const speed = Math.floor(lines / 10)
+    const dropInterval = 1000 - speed * 100; // piece falls every 1000ms
+
 
     if (!isGameOver && !isProcessing && !isPaused) {
 
@@ -81,14 +86,15 @@ const gameLoop = async (time: number) => {
                 lines += conectedLines;
                 score += replacedValues;
 
-                drawLinesNumber(lines, ctx);
-                drawScore(score, ctx);
 
                 currentFigure = spawnFigure(nextFigure);
                 nextFigure = randomFigure();
 
-                drawNextFigure(nextFigure, COLS + 4, ROWS / 2, ctx);
+                drawNextFigure(nextFigure, COLS + 4, 4, ctx);
 
+                drawSpeed(speed, ctx);
+                drawLinesNumber(lines, ctx);
+                drawScore(score, ctx);
               
                 isProcessing = false;
             } else {

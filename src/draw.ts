@@ -18,8 +18,8 @@ export const drawFigure = (figure: Figure, x: number, y: number, ctx: CanvasRend
         const row = figure.shape[rowIndex];
         for (let colIndex = 0; colIndex < row.length; colIndex++) {
             if (row[colIndex] == 1) {
-                ctx.fillRect((colIndex  + x) * SQUARE_SIZE,
-                    (rowIndex  + y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+                ctx.fillRect((colIndex + x) * SQUARE_SIZE,
+                    (rowIndex + y) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
             }
         }
     }
@@ -34,26 +34,33 @@ export const drawNextFigure = (figure: Figure, x: number, y: number, ctx: Canvas
 export const drawStats = (ctx: CanvasRenderingContext2D) => {
     ctx.fillStyle = COLORS[6];
     ctx.font = "16px 'Press Start 2P'";
-    ctx.fillText('Score:', COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4);
-    ctx.fillText('Lines:', COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 80);
-    ctx.fillText('Next:', COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 160);
+    ["Next:", "Speed:", "Lines:", "Score"].forEach((state, i) =>
+        ctx.fillText(state, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (i * 80)));
 
 }
 
-export const drawScore = (score: number, ctx: CanvasRenderingContext2D) => {
+export const drawSpeed = (speed: number, ctx: CanvasRenderingContext2D) => {
     ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = '#FFF';
-    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4, 160, 40)
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 80, 100, 40)
     ctx.fillStyle = COLORS[6];
-    ctx.fillText(score.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 30);
+    ctx.fillText(speed.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 110);
 }
 
 export const drawLinesNumber = (lines: number, ctx: CanvasRenderingContext2D) => {
     ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = '#FFF';
-    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 80, 160, 40)
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 160, 100, 40)
     ctx.fillStyle = COLORS[6];
-    ctx.fillText(lines.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 110);
+    ctx.fillText(lines.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 190);
+}
+
+export const drawScore = (score: number, ctx: CanvasRenderingContext2D) => {
+    ctx.font = "16px 'Press Start 2P'";
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 240, 100, 40)
+    ctx.fillStyle = COLORS[6];
+    ctx.fillText(score.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 270);
 }
 
 export const drawPause = (ctx: CanvasRenderingContext2D) => {
