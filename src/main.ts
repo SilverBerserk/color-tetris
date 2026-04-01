@@ -1,8 +1,8 @@
 import { checkCollision } from "./collision";
-import { drawCanvas, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue, loadFonts } from "./draw";
+import { drawCanvas, drawDoubleValue, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue, loadFonts } from "./draw";
 import { randomFigure } from "./figures";
 import { checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
-import { CANVAS_HEIGHT, CANVAS_WIDHT, COLS, ROWS } from "./settings";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, COLS, ROWS, SQUARE_SIZE } from "./settings";
 import { Figure } from "./types";
 
 let lines = 0;
@@ -19,7 +19,7 @@ const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 
-canvas.width = CANVAS_WIDHT
+canvas.width = CANVAS_WIDTH
 canvas.height = CANVAS_HEIGHT
 canvas.style.marginTop = "60px"
 
@@ -47,14 +47,14 @@ const init = async () => {
     await loadFonts()
     await drawCanvas(ctx)
     drawStats(ctx)
-    drawValue(0, 15, 80, ctx)
-    drawValue(lines, 15, 160, ctx)
-    drawValue(score, 15, 240, ctx)
+    drawDoubleValue(0, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 80, ctx)
+    drawDoubleValue(lines, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 160, ctx)
+    drawDoubleValue(score, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 240, ctx)
 
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
 
-    drawNextFigure(nextFigure, COLS + 3, 4, ctx)
+    drawNextFigure(nextFigure, COLS + 3, 3, ctx)
 }
 
 await init()
@@ -69,29 +69,24 @@ const gameLoop = async (time: number) => {
     const speed = Math.floor(lines / 10)
     const dropInterval = 1000 - speed * 100; // piece falls every 1000ms
 
-
     if (!isGameOver && !isProcessing && !isPaused) {
-
         dropCounter += deltaTime;
 
         if (dropCounter > dropInterval) {
             dropCounter = 0;
 
-            if (
-                checkCollision(currentFigure, arr, fig_x, fig_y + 1)
-            ) {
+            if (checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
                 isProcessing = true;
                 pinFigure(arr, currentFigure, fig_x, fig_y);
 
                 const { replacedValues, conectedLines } =
                     checkConnection(arr);
 
-                if (conectedLines)
-                    if (conectedLines) {
-                        drawField(arr, ctx)
-                        await sleep(50)
-                        cleanUp(arr)
-                    }
+                if (conectedLines) {
+                    drawField(arr, ctx)
+                    await sleep(50)
+                    cleanUp(arr)
+                }
                 lines += conectedLines;
                 score += replacedValues;
 
@@ -99,11 +94,11 @@ const gameLoop = async (time: number) => {
                 currentFigure = spawnFigure(nextFigure);
                 nextFigure = randomFigure();
 
-                drawNextFigure(nextFigure, COLS + 3, 4, ctx);
+                drawNextFigure(nextFigure, COLS + 3, 3, ctx);
 
-                drawValue(speed, 15, 80, ctx);
-                drawValue(lines, 15, 160, ctx);
-                drawValue(score, 15, 240, ctx);
+                drawDoubleValue(speed, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 80, ctx);
+                drawDoubleValue(lines, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 160, ctx);
+                drawDoubleValue(score, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 240, ctx);
 
                 isProcessing = false;
             } else {
@@ -160,6 +155,7 @@ window.addEventListener("keydown", (e) => {
         while (!checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
             fig_y++
         }
+        dropCounter = 0;
         drawField(arr, ctx)
         drawFigure(currentFigure, fig_x, fig_y, ctx)
     }

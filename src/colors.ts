@@ -6,5 +6,9 @@ export const COLORS = [
     "#9D4EDD", // purple
     "#7AE582", // lime green
     "#3A86FF", // blue
-    "#FFFFFF"  // white
+    "#FFFFFF",  // white
+    "#B67D0C",
+    "#996900",
+    "#FFB62C",
+    "#990000"
 ];
