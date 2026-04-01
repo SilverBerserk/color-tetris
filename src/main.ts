@@ -1,5 +1,5 @@
 import { checkCollision } from "./collision";
-import { drawCanvas, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue } from "./draw";
+import { drawCanvas, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue, loadFonts } from "./draw";
 import { randomFigure } from "./figures";
 import { checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
 import { COLS, ROWS } from "./settings";
@@ -20,15 +20,6 @@ const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
-await document.fonts.ready.then(
-    () => {
-        drawStats(ctx)
-        drawValue(0, 15, 80, ctx)
-        drawValue(lines, 15, 160, ctx)
-        drawValue(score, 15, 240, ctx)
-
-    })
-
 const spawnFigure = (newFigure: Figure) => {
     fig_y = 0;
     fig_x = Math.floor(COLS / 2 - newFigure.shape[0].length / 2);
@@ -43,18 +34,25 @@ let arr: number[][];
 let currentFigure: Figure;
 let nextFigure: Figure
 
-const init = () => {
+const init = async () => {
     arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
     lines = 0;
     score = 0
 
+    await loadFonts()
+    await drawCanvas(ctx)
+    drawStats(ctx)
+    drawValue(0, 15, 80, ctx)
+    drawValue(lines, 15, 160, ctx)
+    drawValue(score, 15, 240, ctx)
+    
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
 
-    drawNextFigure(nextFigure, COLS + 4, 4, ctx)
+    drawNextFigure(nextFigure, COLS + 3, 4, ctx)
 }
 
-init()
+await init()
 
 let lastTime = 0;
 let dropCounter = 0;
@@ -85,7 +83,7 @@ const gameLoop = async (time: number) => {
 
                 if (conectedLines)
                     if (conectedLines) {
-                        drawCanvas(arr, ctx)
+                        drawField(arr, ctx)
                         await sleep(50)
                         cleanUp(arr)
                     }
@@ -96,7 +94,7 @@ const gameLoop = async (time: number) => {
                 currentFigure = spawnFigure(nextFigure);
                 nextFigure = randomFigure();
 
-                drawNextFigure(nextFigure, COLS + 4, 4, ctx);
+                drawNextFigure(nextFigure, COLS + 3, 4, ctx);
 
                 drawValue(speed, 15, 80, ctx);
                 drawValue(lines, 15, 160, ctx);
@@ -107,7 +105,7 @@ const gameLoop = async (time: number) => {
                 fig_y++;
             }
 
-            drawCanvas(arr, ctx);
+            drawField(arr, ctx);
             currentFigure && drawFigure(currentFigure, fig_x, fig_y, ctx);
 
             if (isGameOver)
@@ -126,14 +124,14 @@ window.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") {
         if (!checkCollision(currentFigure, arr, fig_x - 1, fig_y)) {
             fig_x--;
-            drawCanvas(arr, ctx)
+            drawField(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowRight") {
         if (!checkCollision(currentFigure, arr, fig_x + 1, fig_y)) {
             fig_x++;
-            drawCanvas(arr, ctx)
+            drawField(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
@@ -141,7 +139,7 @@ window.addEventListener("keydown", (e) => {
         const newFigure = spinFigure(currentFigure)
         if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
             currentFigure = newFigure;
-            drawCanvas(arr, ctx)
+            drawField(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
@@ -149,7 +147,7 @@ window.addEventListener("keydown", (e) => {
         const newFigure = spinFigure(currentFigure, true)
         if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
             currentFigure = newFigure;
-            drawCanvas(arr, ctx)
+            drawField(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
@@ -157,7 +155,7 @@ window.addEventListener("keydown", (e) => {
         while (!checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
             fig_y++
         }
-        drawCanvas(arr, ctx)
+        drawField(arr, ctx)
         drawFigure(currentFigure, fig_x, fig_y, ctx)
     }
     if (e.key === "r") {
