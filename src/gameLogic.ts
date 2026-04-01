@@ -1,15 +1,11 @@
-import { drawCanvas } from "./draw";
 import { FIGURES } from "./figures";
 import { COLS } from "./settings";
 import { Figure } from "./types";
 
-const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
-
-const OUT_NUMBER = FIGURES.length + 1
 
 export const cleanUp = (arr: number[][]) => {
     for (let r = arr.length - 1; r >= 0; r--) {
-        if (arr[r][0] === OUT_NUMBER) {
+        if (arr[r][0] === FIGURES.length + 1) {
             arr.splice(r, 1)
             arr.unshift(new Array(arr[0].length).fill(0))
             r++
@@ -17,7 +13,7 @@ export const cleanUp = (arr: number[][]) => {
     }
 }
 
-export const checkConnection = async (arr: number[][], ctx: CanvasRenderingContext2D) => {
+export const checkConnection = (arr: number[][]) => {
     let conectedLines = 0;
     let replacedValues = 0;
     for (let rowIndex = arr.length - 1; rowIndex >= 0; rowIndex--) {
@@ -27,13 +23,7 @@ export const checkConnection = async (arr: number[][], ctx: CanvasRenderingConte
         conectedLines++
         replacedValues += COLS;
 
-        arr[rowIndex].fill(OUT_NUMBER)
-    }
-
-    if (conectedLines) {
-        drawCanvas(arr, ctx)
-        await sleep(50)
-        cleanUp(arr)
+        arr[rowIndex].fill(FIGURES.length + 1)
     }
 
     return { replacedValues, conectedLines };

@@ -1,9 +1,9 @@
-import { checkBorders, checkForCollision } from "./collision";
-import { drawCanvas, drawFigure, drawGameOver, drawLinesNumber, drawNextFigure, drawPause, drawScore, drawSpeed, drawStats } from "./draw";
+import { checkCollision } from "./collision";
+import { drawCanvas, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue } from "./draw";
 import { randomFigure } from "./figures";
-import { checkConnection, pinFigure, spinFigure } from "./gameLogic";
+import { checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
 import { COLS, ROWS } from "./settings";
-import { Figure, DIRECTION } from "./types";
+import { Figure } from "./types";
 
 let lines = 0;
 let score = 0;
@@ -15,16 +15,17 @@ let isProcessing = false;
 let isPaused = false;
 let isGameOver = false;
 
+const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
-document.fonts.ready.then(
+await document.fonts.ready.then(
     () => {
         drawStats(ctx)
-        drawSpeed(0, ctx)
-        drawLinesNumber(lines, ctx)
-        drawScore(score, ctx)
+        drawValue(0, 15, 80, ctx)
+        drawValue(lines, 15, 160, ctx)
+        drawValue(score, 15, 240, ctx)
 
     })
 
@@ -32,7 +33,7 @@ const spawnFigure = (newFigure: Figure) => {
     fig_y = 0;
     fig_x = Math.floor(COLS / 2 - newFigure.shape[0].length / 2);
 
-    if (checkForCollision(newFigure, arr, fig_x, fig_y)) {
+    if (checkCollision(newFigure, arr, fig_x, fig_y)) {
         isGameOver = true;
     }
     return newFigure
@@ -74,15 +75,20 @@ const gameLoop = async (time: number) => {
             dropCounter = 0;
 
             if (
-                checkBorders(currentFigure, fig_x, fig_y) ||
-                checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)
+                checkCollision(currentFigure, arr, fig_x, fig_y + 1)
             ) {
                 isProcessing = true;
                 pinFigure(arr, currentFigure, fig_x, fig_y);
 
                 const { replacedValues, conectedLines } =
-                    await checkConnection(arr, ctx);
+                    checkConnection(arr);
 
+                if (conectedLines)
+                    if (conectedLines) {
+                        drawCanvas(arr, ctx)
+                        await sleep(50)
+                        cleanUp(arr)
+                    }
                 lines += conectedLines;
                 score += replacedValues;
 
@@ -92,10 +98,10 @@ const gameLoop = async (time: number) => {
 
                 drawNextFigure(nextFigure, COLS + 4, 4, ctx);
 
-                drawSpeed(speed, ctx);
-                drawLinesNumber(lines, ctx);
-                drawScore(score, ctx);
-              
+                drawValue(speed, 15, 80, ctx);
+                drawValue(lines, 15, 160, ctx);
+                drawValue(score, 15, 240, ctx);
+
                 isProcessing = false;
             } else {
                 fig_y++;
@@ -104,8 +110,8 @@ const gameLoop = async (time: number) => {
             drawCanvas(arr, ctx);
             currentFigure && drawFigure(currentFigure, fig_x, fig_y, ctx);
 
-              if(isGameOver)
-                    drawGameOver(ctx)
+            if (isGameOver)
+                drawGameOver(ctx)
         }
     }
 
@@ -118,14 +124,14 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
 
     if (e.key === "ArrowLeft") {
-        if (!checkBorders(currentFigure, fig_x - 1, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.LEFT)) {
+        if (!checkCollision(currentFigure, arr, fig_x - 1, fig_y)) {
             fig_x--;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowRight") {
-        if (!checkBorders(currentFigure, fig_x + 1, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.RIGHT)) {
+        if (!checkCollision(currentFigure, arr, fig_x + 1, fig_y)) {
             fig_x++;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
@@ -133,7 +139,7 @@ window.addEventListener("keydown", (e) => {
     }
     if (e.key === "ArrowUp") {
         const newFigure = spinFigure(currentFigure)
-        if (!checkBorders(newFigure, fig_x, fig_y) && !checkForCollision(newFigure, arr, fig_x, fig_y)) {
+        if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
             currentFigure = newFigure;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
@@ -141,14 +147,14 @@ window.addEventListener("keydown", (e) => {
     }
     if (e.key === "ArrowDown") {
         const newFigure = spinFigure(currentFigure, true)
-        if (!checkBorders(newFigure, fig_x, fig_y) && !checkForCollision(newFigure, arr, fig_x, fig_y)) {
+        if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
             currentFigure = newFigure;
             drawCanvas(arr, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === " ") {
-        while (!checkBorders(currentFigure, fig_x, fig_y) && !checkForCollision(currentFigure, arr, fig_x, fig_y, DIRECTION.DOWN)) {
+        while (!checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
             fig_y++
         }
         drawCanvas(arr, ctx)

@@ -1,41 +1,143 @@
-# 🎮 Sand Tetris (TypeScript + HTML Canvas)
+# 🎮 Color Tetris
 
-A fast, clean, modern implementation of **Tetris built in TypeScript**, rendered using **HTML5 Canvas**.  
-Includes real-time gravity, rotation, collision detection, line clearing, white-flash animation, next-piece preview, and a classic arcade feel.
+A classic **Tetris game** built with **pure TypeScript**, **HTML Canvas**, and **no frameworks**.
 
-## ⭐ Features
-- **TypeScript-powered game engine**
-- **Canvas rendering** for smooth drawing
-- **Piece rotation**
-- **Gravity & soft drop**
-- **Instant hard-drop**
-- **Line detection with white-flash animation**
-- **Custom flood-fill connection algorithm**
-- **Break-down physics** (blocks fall like sand)
-- **Next Figure preview**
-- **Pixel/Arcade-style fonts**
-- **Keyboard controls**
-- 60 FPS update loop (configurable)
-- Clean architecture & reusable grid helpers
+---
 
-## 🕹️ Controls
+# ✨ Features
 
-| Key            | Action                    |
-| ---------------- | --------------------------- |
-| ⬅ ArrowLeft    | Move left                  |
-| ➡ ArrowRight   | Move right                 |
-| ⬇ ArrowDown    | Soft drop                 |
-| ⬆ ArrowUp      | Rotate piece              |
-| SPACE           | Hard drop (instant fall)  |
-| R               | Restart game              |
+* Pure TypeScript (no libraries)
+* Canvas rendering
+* Real FPS game loop (`requestAnimationFrame`)
+* Collision detection
+* Line clearing with highlight animation
+* Score system
+* Level speed increase
+* Next piece preview
+* Pause / Resume
+* Game Over screen
+* Hard drop (Space)
 
+---
 
-## 🛠️ Installation
-> git clone https://github.com/SilverBerserk/sand-tetris.git
+# 🎮 Controls
 
-> cd sand-tetris
+| Key   | Action           |
+| ----- | ---------------- |
+| ←     | Move Left        |
+| →     | Move Right       |
+| ↑     | Rotate           |
+| ↓     | Rotate (reverse) |
+| Space | Hard Drop        |
+| Enter | Pause / Resume   |
+| R     | Restart          |
 
-> npm install
+---
 
-> npm run dev
+# 🧠 Game Logic
+
+* Lines increase game speed
+* Every **10 lines** increases difficulty
+* Full lines are **highlighted** before clearing
+* Pieces drop faster as level increases
+
+---
+
+# 🏗️ Project Structure
+
+```
+src/
+ ├── collision.ts
+ ├── draw.ts
+ ├── figures.ts
+ ├── gameLogic.ts
+ ├── settings.ts
+ ├── types.ts
+ └── main.ts
+
+dist/
+index.html
+README.md
+```
+
+---
+
+# 🚀 Getting Started
+
+## Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Build (using esbuild)
+
+```bash
+npm run build
+```
+
+---
+
+## Watch mode (development)
+
+```bash
+npm run watch
+```
+
+---
+
+## Run locally
+
+Use a local server:
+
+```bash
+npx serve
+```
+
+or
+
+```bash
+python -m http.server
+```
+
+Then open:
+
+```
+http://localhost:3000
+```
+
+---
+
+# ⚡ Tech Stack
+
+* TypeScript
+* HTML Canvas
+* requestAnimationFrame
+* esbuild
+
+---
+
+# 🎯 Future Improvements
+
+* Ghost piece
+* Hold piece
+* Sound effects
+* Mobile support
+* Touch controls
+* Animations
+* Leaderboard
+
+---
+
+# 📸 Preview
+
+Classic Tetris gameplay with:
+
+* Smooth controls
+* Dynamic speed
+* Clean UI
+
+---
 

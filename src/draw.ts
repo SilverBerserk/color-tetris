@@ -36,49 +36,31 @@ export const drawStats = (ctx: CanvasRenderingContext2D) => {
     ctx.font = "16px 'Press Start 2P'";
     ["Next:", "Speed:", "Lines:", "Score"].forEach((state, i) =>
         ctx.fillText(state, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (i * 80)));
-
 }
 
-export const drawSpeed = (speed: number, ctx: CanvasRenderingContext2D) => {
+export const drawValue = (value: number, x: number, y: number, ctx: CanvasRenderingContext2D) => {
     ctx.font = "16px 'Press Start 2P'";
     ctx.fillStyle = '#fff';
-    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 80, 100, 40)
+    ctx.fillRect(COLS * SQUARE_SIZE + x, ROWS * SQUARE_SIZE / 4 + y, 100, 40)
     ctx.fillStyle = COLORS[6];
-    ctx.fillText(speed.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 110);
+    ctx.fillText(value.toString(), COLS * SQUARE_SIZE + x + 5, ROWS * SQUARE_SIZE / 4 + y + 30);
 }
 
-export const drawLinesNumber = (lines: number, ctx: CanvasRenderingContext2D) => {
-    ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 160, 100, 40)
-    ctx.fillStyle = COLORS[6];
-    ctx.fillText(lines.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 190);
-}
-
-export const drawScore = (score: number, ctx: CanvasRenderingContext2D) => {
-    ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(COLS * SQUARE_SIZE + 15, ROWS * SQUARE_SIZE / 4 + 240, 100, 40)
-    ctx.fillStyle = COLORS[6];
-    ctx.fillText(score.toString(), COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 270);
+const drawDoubleText = (value: string, x: number, y: number, ctx: CanvasRenderingContext2D) => {
+    ctx.font = "56px 'Press Start 2P'";
+    ctx.fillStyle = 'red';
+    ctx.fillText(value, x, y + 5);
+    ctx.fillStyle = 'yellow'
+    ctx.fillText(value, x - 5, y);
 }
 
 export const drawPause = (ctx: CanvasRenderingContext2D) => {
     console.warn("Pause")
-    ctx.font = "56px 'Press Start 2P'";
-    ctx.fillStyle = 'red';
-    ctx.fillText('PAUSE', 50, ROWS * SQUARE_SIZE / 2 + 5);
-    ctx.fillStyle = 'yellow';
-    ctx.fillText('PAUSE', 45, ROWS * SQUARE_SIZE / 2);
+    drawDoubleText("PAUSE", 50, ROWS * SQUARE_SIZE / 2, ctx)
 }
 
 export const drawGameOver = (ctx: CanvasRenderingContext2D) => {
     console.warn("Game Over")
-    ctx.font = "56px 'Press Start 2P'";
-    ctx.fillStyle = 'red';
-    ctx.fillText('GAME', 70, ROWS * SQUARE_SIZE / 2 - 15);
-    ctx.fillText('OVER', 70, ROWS * SQUARE_SIZE / 2 + 45);
-    ctx.fillStyle = 'yellow';
-    ctx.fillText('GAME', 65, ROWS * SQUARE_SIZE / 2 - 20);
-    ctx.fillText('OVER', 65, ROWS * SQUARE_SIZE / 2 + 40);
+    drawDoubleText("GAME", 70, ROWS * SQUARE_SIZE / 2 - 20, ctx)
+    drawDoubleText("OVER", 70, ROWS * SQUARE_SIZE / 2 + 40, ctx)
 }
