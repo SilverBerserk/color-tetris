@@ -2,7 +2,7 @@ import { checkCollision } from "./collision";
 import { drawCanvas, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue, loadFonts } from "./draw";
 import { randomFigure } from "./figures";
 import { checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
-import { COLS, ROWS } from "./settings";
+import { CANVAS_HEIGHT, CANVAS_WIDHT, COLS, ROWS } from "./settings";
 import { Figure } from "./types";
 
 let lines = 0;
@@ -18,6 +18,11 @@ let isGameOver = false;
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
+
+canvas.width = CANVAS_WIDHT
+canvas.height = CANVAS_HEIGHT
+canvas.style.marginTop = "60px"
+
 const ctx = canvas.getContext("2d")!;
 
 const spawnFigure = (newFigure: Figure) => {
@@ -45,7 +50,7 @@ const init = async () => {
     drawValue(0, 15, 80, ctx)
     drawValue(lines, 15, 160, ctx)
     drawValue(score, 15, 240, ctx)
-    
+
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
 
