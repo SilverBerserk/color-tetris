@@ -1,6 +1,5 @@
-import { COLORS } from "./colors"
+import { COLORS, FIGURE_COLOR } from "./colors"
 import { CANVAS_HEIGHT, CANVAS_WIDTH, COLS, ROWS, SQUARE_SIZE } from "./settings"
-import { Figure } from "./types";
 
 import borderImg from "./img/border.png";
 import gemImg from "./img/gem.png";
@@ -27,7 +26,7 @@ export const loadFonts = async () => {
 export const drawCanvas = async (ctx: CanvasRenderingContext2D) => {
     const height = SQUARE_SIZE * ROWS
 
-    ctx.fillStyle = COLORS[8]
+    ctx.fillStyle = COLORS[1]
     ctx.fillRect(border.width, border.width, height, CANVAS_WIDTH)
 
     for (let y = 0; y < height + border.height; y += border.height) {
@@ -64,17 +63,17 @@ export const drawCanvas = async (ctx: CanvasRenderingContext2D) => {
 export const drawField = (grid: number[][], ctx: CanvasRenderingContext2D) => {
     grid.forEach((row, rowIndex) =>
         row.forEach((cell, colIndex) => {
-            ctx.fillStyle = COLORS[cell]
+            ctx.fillStyle = FIGURE_COLOR[cell]
             ctx.fillRect(colIndex * SQUARE_SIZE + border.width, rowIndex * SQUARE_SIZE + border.width, SQUARE_SIZE, SQUARE_SIZE);
         }
         ));
 };
 
-export const drawFigure = (figure: Figure, x: number, y: number, ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = COLORS[figure.value]
-    figure.shape.forEach((row, rowIndex) =>
+export const drawFigure = (figure: number[][], x: number, y: number, ctx: CanvasRenderingContext2D) => {
+    figure.forEach((row, rowIndex) =>
         row.forEach((cell, colIndex) => {
             if (cell) {
+                ctx.fillStyle = FIGURE_COLOR[cell]
                 ctx.fillRect((colIndex + x) * SQUARE_SIZE + border.width,
                     (rowIndex + y) * SQUARE_SIZE + border.width, SQUARE_SIZE, SQUARE_SIZE);
             }
@@ -82,8 +81,8 @@ export const drawFigure = (figure: Figure, x: number, y: number, ctx: CanvasRend
     );
 };
 
-export const drawNextFigure = (figure: Figure, x: number, y: number, ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = COLORS[8]
+export const drawNextFigure = (figure: number[][], x: number, y: number, ctx: CanvasRenderingContext2D) => {
+    ctx.fillStyle = COLORS[1]
     ctx.fillRect(x * SQUARE_SIZE + border.width, y * SQUARE_SIZE + border.width, 4 * SQUARE_SIZE, 2 * SQUARE_SIZE);
     drawFigure(figure, x, y, ctx)
 }
@@ -94,23 +93,29 @@ export const drawStats = (ctx: CanvasRenderingContext2D) => {
             i * 80 + 110, ctx))
 }
 
+export const drawStatsValues = (statsValues: number[], ctx: CanvasRenderingContext2D) => {
+    statsValues.forEach((value, index) =>
+        drawDoubleValue(value, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (index + 1) * 80, ctx)
+    )
+}
+
 const drawDoubleText = (value: string, x: number, y: number, ctx: CanvasRenderingContext2D) => {
     ctx.font = "56px 'Press Start 2P'";
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = COLORS[5];
     ctx.fillText(value, x, y + 5);
-    ctx.fillStyle = 'yellow'
+    ctx.fillStyle = COLORS[6];
     ctx.fillText(value, x - 5, y);
 }
 
 export const drawDoubleValue = (value: string | number, x: number, y: number, ctx: CanvasRenderingContext2D) => {
     ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = COLORS[8];
+    ctx.fillStyle = COLORS[1];
     ctx.fillRect(x, y, 100, 20)
-    ctx.fillStyle = COLORS[9];
+    ctx.fillStyle = COLORS[2];
     ctx.fillText(value.toString(), x + 6, y + 18);
-    ctx.fillStyle = COLORS[10];
+    ctx.fillStyle = COLORS[3];
     ctx.fillText(value.toString(), x + 8, y + 20);
-    ctx.fillStyle = COLORS[11];
+    ctx.fillStyle = COLORS[4];
     ctx.fillText(value.toString(), x + 7, y + 19);
 }
 

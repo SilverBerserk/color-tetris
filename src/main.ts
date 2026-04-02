@@ -1,11 +1,11 @@
-import { drawCanvas, drawDoubleValue, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, loadFonts } from "./draw";
+import { drawCanvas, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawStatsValues, loadFonts } from "./draw";
 import { randomFigure } from "./figures";
 import { checkCollision, checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, COLS, ROWS, SQUARE_SIZE } from "./settings";
-import { Figure } from "./types";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, COLS, ROWS } from "./settings";
 
 let lines = 0;
 let score = 0;
+const maxScore = parseInt(localStorage.getItem("color-tetris") ?? "0") 
 
 let fig_x = 0;
 let fig_y = 0;
@@ -17,7 +17,9 @@ let isGameOver = false;
 let lastTime = 0;
 let dropCounter = 0;
 
-const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+let grid: number[][];
+let currentFigure: number[][];
+let nextFigure: number[][]
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 
@@ -27,19 +29,18 @@ canvas.style.marginTop = "60px"
 
 const ctx = canvas.getContext("2d")!;
 
-const spawnFigure = (newFigure: Figure) => {
+const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+const spawnFigure = (newFigure: number[][]) => {
     fig_y = 0;
-    fig_x = Math.floor(COLS / 2 - newFigure.shape[0].length / 2);
+    fig_x = Math.floor(COLS / 2 - newFigure[0].length / 2);
 
     if (checkCollision(newFigure, grid, fig_x, fig_y)) {
         isGameOver = true;
+        window.localStorage.setItem("color-tetris", score.toString());
     }
     return newFigure
 }
-
-let grid: number[][];
-let currentFigure: Figure;
-let nextFigure: Figure
 
 const init = async () => {
     grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
@@ -49,10 +50,7 @@ const init = async () => {
     await loadFonts()
     await drawCanvas(ctx)
     drawStats(ctx);
-
-    [0, lines, score].forEach((value, index) =>
-        drawDoubleValue(value, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (index + 1) * 80, ctx)
-    )
+    drawStatsValues([0, lines, score], ctx)
 
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
@@ -94,10 +92,7 @@ const gameLoop = async (time: number) => {
                 nextFigure = randomFigure();
 
                 drawNextFigure(nextFigure, COLS + 3, 3, ctx);
-
-                [speed, lines, score].forEach((value, index) =>
-                    drawDoubleValue(value, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (index + 1) * 80, ctx)
-                )
+                drawStatsValues([speed, lines, score], ctx)
 
                 isProcessing = false;
             } else {

@@ -1,78 +1,54 @@
-# 🎮 Color Tetris
+# Color Tetris 🎮
 
-A classic **Tetris game** built with **pure TypeScript**, **HTML Canvas**, and **no frameworks**.
-
----
-
-# ✨ Features
-
-* Pure TypeScript (no libraries)
-* Canvas rendering
-* Real FPS game loop (`requestAnimationFrame`)
-* Collision detection
-* Line clearing with highlight animation
-* Score system
-* Level speed increase
-* Next piece preview
-* Pause / Resume
-* Game Over screen
-* Hard drop (Space)
+A modern **Color Tetris** game built using **TypeScript**, **Canvas API**, and **Vite**.
+This version includes smooth animations, scoring system, next piece preview, speed scaling, and pause/game over states.
 
 ---
 
-# 🎮 Controls
+## ✨ Features
 
-| Key   | Action           |
-| ----- | ---------------- |
-| ←     | Move Left        |
-| →     | Move Right       |
-| ↑     | Rotate           |
-| ↓     | Rotate (reverse) |
-| Space | Hard Drop        |
-| Enter | Pause / Resume   |
-| R     | Restart          |
-
----
-
-# 🧠 Game Logic
-
-* Lines increase game speed
-* Every **10 lines** increases difficulty
-* Full lines are **highlighted** before clearing
-* Pieces drop faster as level increases
+* 🎮 Classic Tetris gameplay
+* 🎨 Color-based line matching
+* ⚡ Speed increases with progress
+* 🔮 Next figure preview
+* 📊 Score, lines and speed stats
+* ⏸ Pause / Resume
+* 🔄 Restart game
+* 💥 Game over screen
+* 🧠 Smart collision detection
+* 🎯 Smooth animations using `requestAnimationFrame`
 
 ---
 
-# 🏗️ Project Structure
+## 🕹 Controls
 
-```
-src/
- ├── collision.ts
- ├── draw.ts
- ├── figures.ts
- ├── gameLogic.ts
- ├── settings.ts
- ├── types.ts
- └── main.ts
-
-dist/
-index.html
-README.md
-```
+| Key   | Action                   |
+| ----- | ------------------------ |
+| ←     | Move left                |
+| →     | Move right               |
+| ↑     | Rotate clockwise         |
+| ↓     | Rotate counter-clockwise |
+| Space | Hard drop                |
+| Enter | Pause / Resume           |
+| R     | Restart game             |
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Getting Started
 
-## Install dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
----
+### Run development server
 
-## Build (using esbuild)
+```bash
+npm run dev
+```
+
+### Build project
 
 ```bash
 npm run build
@@ -80,64 +56,85 @@ npm run build
 
 ---
 
-## Watch mode (development)
+## 🧠 Game Logic Overview
 
-```bash
-npm run watch
+### Core Systems
+
+* **Game Loop** — `requestAnimationFrame`
+* **Collision Detection** — `checkCollision`
+* **Line Matching** — `checkConnection`
+* **Cleanup Animation** — `cleanUp`
+* **Figure Rotation** — `spinFigure`
+* **Figure Locking** — `pinFigure`
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── colors.ts        # Colors for figures and screen
+├── draw.ts          # Canvas drawing functions
+├── figures.ts       # Tetris shapes & random generator
+├── gameLogic.ts     # Game logic and collision
+├── main.ts          # Main game loop
+├── settings.ts      # Constants & configuration
 ```
 
 ---
 
-## Run locally
+## 📊 Game Stats
 
-Use a local server:
+The game tracks:
 
-```bash
-npx serve
-```
-
-or
-
-```bash
-python -m http.server
-```
-
-Then open:
-
-```
-http://localhost:3000
-```
+* **Next** — upcoming figure
+* **Speed** — increases every 20 lines
+* **Lines** — cleared lines
+* **Score** — based on matched colors
 
 ---
 
-# ⚡ Tech Stack
+## ⚡ Speed System
+
+Game becomes faster every **20 cleared lines**.
+
+---
+
+## 🎨 Rendering
+
+Canvas rendering is split into:
+
+* `drawCanvas` — static board
+* `drawField` — grid
+* `drawFigure` — active piece
+* `drawNextFigure` — preview
+* `drawStats` — labels
+* `drawStatsValues` — dynamic values
+* `drawPause` — pause screen
+* `drawGameOver` — game over screen
+
+---
+
+## 🛠 Tech Stack
 
 * TypeScript
-* HTML Canvas
-* requestAnimationFrame
-* esbuild
+* Canvas API
+* Vite
+* ES Modules
 
 ---
 
-# 🎯 Future Improvements
+## 🎯 Future Ideas
 
+* Sound effects
+* Mobile controls
+* High score system
+* Animations
 * Ghost piece
 * Hold piece
-* Sound effects
-* Mobile support
-* Touch controls
-* Animations
-* Leaderboard
 
 ---
 
-# 📸 Preview
+## 🧑‍💻 Author
 
-Classic Tetris gameplay with:
-
-* Smooth controls
-* Dynamic speed
-* Clean UI
-
----
-
+Color Tetris — Built for learning and fun 🎮
