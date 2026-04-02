@@ -61,8 +61,8 @@ export const drawCanvas = async (ctx: CanvasRenderingContext2D) => {
     ctx.drawImage(gem, CANVAS_WIDTH - border.width, height + border.width)
 }
 
-export const drawField = (arr: number[][], ctx: CanvasRenderingContext2D) => {
-    arr.forEach((row, rowIndex) =>
+export const drawField = (grid: number[][], ctx: CanvasRenderingContext2D) => {
+    grid.forEach((row, rowIndex) =>
         row.forEach((cell, colIndex) => {
             ctx.fillStyle = COLORS[cell]
             ctx.fillRect(colIndex * SQUARE_SIZE + border.width, rowIndex * SQUARE_SIZE + border.width, SQUARE_SIZE, SQUARE_SIZE);
@@ -89,17 +89,9 @@ export const drawNextFigure = (figure: Figure, x: number, y: number, ctx: Canvas
 }
 
 export const drawStats = (ctx: CanvasRenderingContext2D) => {
-    ["Next:", "Speed:", "Lines:", "Score"].forEach((state, i) =>
+    ["Next:", "Speed:", "Lines:", "Score:"].forEach((state, i) =>
         drawDoubleValue(state, COLS * SQUARE_SIZE + 20,
             i * 80 + 110, ctx))
-}
-
-export const drawValue = (value: number, x: number, y: number, ctx: CanvasRenderingContext2D) => {
-    ctx.font = "16px 'Press Start 2P'";
-    ctx.fillStyle = COLORS[8];
-    ctx.fillRect(COLS * SQUARE_SIZE + x, ROWS * SQUARE_SIZE / 4 + y, 100, 40)
-    ctx.fillStyle = COLORS[6];
-    ctx.fillText(value.toString(), COLS * SQUARE_SIZE + x + 5, ROWS * SQUARE_SIZE / 4 + y + 30);
 }
 
 const drawDoubleText = (value: string, x: number, y: number, ctx: CanvasRenderingContext2D) => {

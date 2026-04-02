@@ -1,7 +1,6 @@
-import { checkCollision } from "./collision";
-import { drawCanvas, drawDoubleValue, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, drawValue, loadFonts } from "./draw";
+import { drawCanvas, drawDoubleValue, drawField, drawFigure, drawGameOver, drawNextFigure, drawPause, drawStats, loadFonts } from "./draw";
 import { randomFigure } from "./figures";
-import { checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
+import { checkCollision, checkConnection, cleanUp, pinFigure, spinFigure } from "./gameLogic";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, COLS, ROWS, SQUARE_SIZE } from "./settings";
 import { Figure } from "./types";
 
@@ -14,6 +13,9 @@ let fig_y = 0;
 let isProcessing = false;
 let isPaused = false;
 let isGameOver = false;
+
+let lastTime = 0;
+let dropCounter = 0;
 
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -29,27 +31,28 @@ const spawnFigure = (newFigure: Figure) => {
     fig_y = 0;
     fig_x = Math.floor(COLS / 2 - newFigure.shape[0].length / 2);
 
-    if (checkCollision(newFigure, arr, fig_x, fig_y)) {
+    if (checkCollision(newFigure, grid, fig_x, fig_y)) {
         isGameOver = true;
     }
     return newFigure
 }
 
-let arr: number[][];
+let grid: number[][];
 let currentFigure: Figure;
 let nextFigure: Figure
 
 const init = async () => {
-    arr = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
+    grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0)) as number[][];
     lines = 0;
     score = 0
 
     await loadFonts()
     await drawCanvas(ctx)
-    drawStats(ctx)
-    drawDoubleValue(0, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 80, ctx)
-    drawDoubleValue(lines, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 160, ctx)
-    drawDoubleValue(score, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 240, ctx)
+    drawStats(ctx);
+
+    [0, lines, score].forEach((value, index) =>
+        drawDoubleValue(value, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (index + 1) * 80, ctx)
+    )
 
     currentFigure = spawnFigure(randomFigure());
     nextFigure = randomFigure();
@@ -59,15 +62,11 @@ const init = async () => {
 
 await init()
 
-let lastTime = 0;
-let dropCounter = 0;
-
-
 const gameLoop = async (time: number) => {
     const deltaTime = time - lastTime;
     lastTime = time;
-    const speed = Math.floor(lines / 10)
-    const dropInterval = 1000 - speed * 100; // piece falls every 1000ms
+    const speed = Math.floor(lines / 20)
+    const dropInterval = 1000 - speed > 900 ? 900 : speed * 50; // piece falls every 1000ms
 
     if (!isGameOver && !isProcessing && !isPaused) {
         dropCounter += deltaTime;
@@ -75,17 +74,17 @@ const gameLoop = async (time: number) => {
         if (dropCounter > dropInterval) {
             dropCounter = 0;
 
-            if (checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
+            if (checkCollision(currentFigure, grid, fig_x, fig_y + 1)) {
                 isProcessing = true;
-                pinFigure(arr, currentFigure, fig_x, fig_y);
+                pinFigure(grid, currentFigure, fig_x, fig_y);
 
                 const { replacedValues, conectedLines } =
-                    checkConnection(arr);
+                    checkConnection(grid);
 
                 if (conectedLines) {
-                    drawField(arr, ctx)
+                    drawField(grid, ctx)
                     await sleep(50)
-                    cleanUp(arr)
+                    cleanUp(grid)
                 }
                 lines += conectedLines;
                 score += replacedValues;
@@ -96,16 +95,16 @@ const gameLoop = async (time: number) => {
 
                 drawNextFigure(nextFigure, COLS + 3, 3, ctx);
 
-                drawDoubleValue(speed, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 80, ctx);
-                drawDoubleValue(lines, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 160, ctx);
-                drawDoubleValue(score, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + 240, ctx);
+                [speed, lines, score].forEach((value, index) =>
+                    drawDoubleValue(value, COLS * SQUARE_SIZE + 20, ROWS * SQUARE_SIZE / 4 + (index + 1) * 80, ctx)
+                )
 
                 isProcessing = false;
             } else {
                 fig_y++;
             }
 
-            drawField(arr, ctx);
+            drawField(grid, ctx);
             currentFigure && drawFigure(currentFigure, fig_x, fig_y, ctx);
 
             if (isGameOver)
@@ -122,41 +121,41 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
 
     if (e.key === "ArrowLeft") {
-        if (!checkCollision(currentFigure, arr, fig_x - 1, fig_y)) {
+        if (!checkCollision(currentFigure, grid, fig_x - 1, fig_y)) {
             fig_x--;
-            drawField(arr, ctx)
+            drawField(grid, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowRight") {
-        if (!checkCollision(currentFigure, arr, fig_x + 1, fig_y)) {
+        if (!checkCollision(currentFigure, grid, fig_x + 1, fig_y)) {
             fig_x++;
-            drawField(arr, ctx)
+            drawField(grid, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowUp") {
         const newFigure = spinFigure(currentFigure)
-        if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
+        if (!checkCollision(newFigure, grid, fig_x, fig_y)) {
             currentFigure = newFigure;
-            drawField(arr, ctx)
+            drawField(grid, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === "ArrowDown") {
         const newFigure = spinFigure(currentFigure, true)
-        if (!checkCollision(newFigure, arr, fig_x, fig_y)) {
+        if (!checkCollision(newFigure, grid, fig_x, fig_y)) {
             currentFigure = newFigure;
-            drawField(arr, ctx)
+            drawField(grid, ctx)
             drawFigure(currentFigure, fig_x, fig_y, ctx)
         }
     }
     if (e.key === " ") {
-        while (!checkCollision(currentFigure, arr, fig_x, fig_y + 1)) {
+        while (!checkCollision(currentFigure, grid, fig_x, fig_y + 1)) {
             fig_y++
         }
         dropCounter = 0;
-        drawField(arr, ctx)
+        drawField(grid, ctx)
         drawFigure(currentFigure, fig_x, fig_y, ctx)
     }
     if (e.key === "r") {
@@ -166,13 +165,17 @@ window.addEventListener("keydown", (e) => {
     }
     if (e.key === "Enter") {
         if (isGameOver) {
-            init()
             isGameOver = false;
             isPaused = false
+            init()
         }
         else {
             if (!isPaused)
                 drawPause(ctx)
+            else {
+                drawField(grid, ctx)
+                drawFigure(currentFigure, fig_x, fig_y, ctx)
+            }
             isPaused = !isPaused
         }
     }
